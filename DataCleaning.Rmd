@@ -1,0 +1,30 @@
+---
+title: "Aging Dependence Data Cleaning"
+author: "Analeidi Barrera"
+date: "2/16/2021"
+output: html_document
+---
+
+```{r}
+library(haven)
+library(dplyr)
+data <- read_por("~/Desktop/Survival/ProjectInformation/ICPSR_08719/DS0001/08719-0001-Data.por")
+```
+
+
+```{r}
+#selecting covariates
+
+aging <- data %>% select(TLKCHL2, TLKCHL3, TLKCHL4, SEECHL2, SEECHL3, SEECHL4, MLCHL2R, MLCHL3R, MLCHL4R, CHLTME2R, CHLTME3R, CHLTME4R, WKSWORK2, WKSWORK3, WKSWORK4, MARSTAT2, MARSTAT3, MARSTAT4, DIFDRES2,DIFDRES3, DIFDRES4, BATH2R, BATH3R, BATH4R, TOILET2R, TOILET3R, TOILET4R, EAT2R, EAT3R, EAT4R, DIFPREP2, DIFPREP3, DIFPREP4, GET2R, GET3R, GET4R, DIFLTHW2, DIFLTHW3,  DIFLTHW4, DIFHSWK2, DIFHSWK3 , DIFHSWK4 , DIFTEL2 , DIFTEL3 , DIFTEL4,DIFMNY2, DIFMNY3, DIFMNY4, DIFSHOP2, DIFSHOP3, DIFSHOP4, DIFOUT2, DIFOUT3, DIFOUT4, DIFWALK2, DIFWALK3, DIFWALK4, BIRTHYR, RACER, SEX)
+```
+
+
+
+
+Some project analysis ideas are:
+-create survival curves for specific covariates (get the CI, mean, and median) using KM curves
+- From the KM curves that look the most interesting, choose the parametric model that fits it best (Cox-Snell(graphically check), Likelihood Ratio Test, AIC)
+- Compare variables to each other (Log Rank Test and Hazard Ratio )
+
+
+

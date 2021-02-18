@@ -5,10 +5,16 @@ date: "2/16/2021"
 output: html_document
 ---
 
+
+```{r}
+#Path to the aging data
+path_data = '/Users/ColleenMinnihan/Desktop/Survival_Analysis/ICPSR_08719/DS0001/08719-0001-Data.por'
+```
+
 ```{r}
 library(haven)
 library(dplyr)
-data <- read_por('/Users/ColleenMinnihan/Desktop/Survival_Analysis/ICPSR_08719/DS0001/08719-0001-Data.por')
+data <- read_por(path_data)
 ```
 
 
@@ -17,25 +23,87 @@ data <- read_por('/Users/ColleenMinnihan/Desktop/Survival_Analysis/ICPSR_08719/D
 
 aging <- data %>% select(TLKCHL2, TLKCHL3, TLKCHL4, SEECHL2, SEECHL3, SEECHL4, MLCHL2R, MLCHL3R, MLCHL4R, CHLTME2R, CHLTME3R, CHLTME4R, WKSWORK2, WKSWORK3, WKSWORK4, MARSTAT2, MARSTAT3, MARSTAT4, DIFDRES2,DIFDRES3, DIFDRES4, BATH2R, BATH3R, BATH4R, TOILET2R, TOILET3R, TOILET4R, EAT2R, EAT3R, EAT4R, DIFPREP2, DIFPREP3, DIFPREP4, GET2R, GET3R, GET4R, DIFLTHW2, DIFLTHW3,  DIFLTHW4, DIFHSWK2, DIFHSWK3 , DIFHSWK4 , DIFTEL2 , DIFTEL3 , DIFTEL4,DIFMNY2, DIFMNY3, DIFMNY4, DIFSHOP2, DIFSHOP3, DIFSHOP4, DIFOUT2, DIFOUT3, DIFOUT4, DIFWALK2, DIFWALK3, DIFWALK4, BIRTHYR, RACER, SEX)
 
-aging_new=aging%>%
-  filter(BATH2R!="") %>%
-  filter(BATH2R == "1")
 
-aging_new$BATH2R
+#Choosing participants who were dependent from the start
 
 bathData <- filter(bathData, bathData$BATH2R != "2" & (bathData$BATH2R != "" | bathData$BATH3R != "" | bathData$BATH4R != "") & (bathData$BATH2R != "3" & bathData$BATH3R != "3" & bathData$BATH4R != "3") & !(bathData$BATH3R == "2" & bathData$BATH4R == "1"))
 
-bathData
+```
 
-aging$BATH2R[1:100]
+Looking into the age distribution of bathroom dependence
 
-aging_new = aging %>%
-  mutate(BATH2R = as.numeric(BATH2R))
+```{r}
+#Creating a new variable called BATHDEPYR to show when they began dependent
+bathData$BATHDEPYR <- ifelse(bathData$BATH3R == "2", 1988, 1990)
+```
 
-aging %>%
-  select(BATH2R) %>%
+
+```{r}
+#Showing which are censored data
+bathData$status <- ifelse(bathData$BATH4R == "1", 0, 1)
+```
+
+
+```{r}
+#age to bath dependence
+bathData$AGE <- (bathData$BATHDEPYR - as.integer(as.character(bathData$BIRTHYR)))
+
+#If the person did not want to answer their birthday year would have been 9999
+
+bathData <- filter(bathData, bathData$AGE > 0) 
+```
+
+
+
+```{r}
+bathData %>%
+  select(TLKCHL2) %>%
   table()
 ```
+
+
+
+```{r}
+#The following is a Kaplan Meier curve for the time a person becomes dependent with taking a shower
+library(survival)
+bathKM= survfit(Surv(bathData$AGE, bathData$status) ~ RACE , data=bathData )
+plot(bathKM, conf.int=FALSE, ylab="Survival Proportion" , xlab="Years", xlim = c(min(bathData$AGE), max(bathData$AGE)), ylim = c(0,1))
+
+```
+
+
+```{r}
+bathKM
+```
+
+
+The median age to have bathroom dependence is 88 years
+```{r}
+#The median age of having bathroom dependence 
+bathKM
+```
+
+
+The mean age of having bathroom dependence is 87.94954 years
+```{r}
+#Using Victor's code to find the mean age of having bathroom dependence
+
+AUCKM = function(survobj,duration)
+{
+base=c(0,summary(survobj)$time,max(duration))
+heights=c(1,summary(survobj)$surv)
+new=c()
+for(i in 1:length(heights)) { new=c(new,(base[i+1]-base[i])*heights[i]) }
+c(sum(new))
+}
+
+AUCKM(bathKM, bathData$AGE)
+```
+
+
+
+
+
 
 dependence:
 -treat "dontknow/refuse" as missing

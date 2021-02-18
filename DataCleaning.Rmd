@@ -8,7 +8,7 @@ output: html_document
 ```{r}
 library(haven)
 library(dplyr)
-data <- read_por("~/Desktop/Survival/ProjectInformation/ICPSR_08719/DS0001/08719-0001-Data.por")
+data <- read_por('/Users/ColleenMinnihan/Desktop/Survival_Analysis/ICPSR_08719/DS0001/08719-0001-Data.por')
 ```
 
 
@@ -16,15 +16,48 @@ data <- read_por("~/Desktop/Survival/ProjectInformation/ICPSR_08719/DS0001/08719
 #selecting covariates
 
 aging <- data %>% select(TLKCHL2, TLKCHL3, TLKCHL4, SEECHL2, SEECHL3, SEECHL4, MLCHL2R, MLCHL3R, MLCHL4R, CHLTME2R, CHLTME3R, CHLTME4R, WKSWORK2, WKSWORK3, WKSWORK4, MARSTAT2, MARSTAT3, MARSTAT4, DIFDRES2,DIFDRES3, DIFDRES4, BATH2R, BATH3R, BATH4R, TOILET2R, TOILET3R, TOILET4R, EAT2R, EAT3R, EAT4R, DIFPREP2, DIFPREP3, DIFPREP4, GET2R, GET3R, GET4R, DIFLTHW2, DIFLTHW3,  DIFLTHW4, DIFHSWK2, DIFHSWK3 , DIFHSWK4 , DIFTEL2 , DIFTEL3 , DIFTEL4,DIFMNY2, DIFMNY3, DIFMNY4, DIFSHOP2, DIFSHOP3, DIFSHOP4, DIFOUT2, DIFOUT3, DIFOUT4, DIFWALK2, DIFWALK3, DIFWALK4, BIRTHYR, RACER, SEX)
+
+aging_new=aging%>%
+  filter(BATH2R!="") %>%
+  filter(BATH2R == "1")
+
+aging_new$BATH2R
+
+bathData <- filter(bathData, bathData$BATH2R != "2" & (bathData$BATH2R != "" | bathData$BATH3R != "" | bathData$BATH4R != "") & (bathData$BATH2R != "3" & bathData$BATH3R != "3" & bathData$BATH4R != "3") & !(bathData$BATH3R == "2" & bathData$BATH4R == "1"))
+
+bathData
+
+aging$BATH2R[1:100]
+
+aging_new = aging %>%
+  mutate(BATH2R = as.numeric(BATH2R))
+
+aging %>%
+  select(BATH2R) %>%
+  table()
 ```
 
+dependence:
+-treat "dontknow/refuse" as missing
+-if they aren't dependent in 1986: keep
+-if they are dependent in 1986: use only if necessary (if not enough data)
 
+PROCESS
+-check when the 1s change to 2s
+-record the year that that happens
+-subtract the birthyear (gives us age when they became dependent) and make status variable ==1
+
+-if it never becomes 2
+-take last survey year
+-subtract birthyear and make status ==0
+
+-we will have age/status pair for each dependency kind
+
+GOAL:
+-do procress for bathing
 
 
 Some project analysis ideas are:
 -create survival curves for specific covariates (get the CI, mean, and median) using KM curves
 - From the KM curves that look the most interesting, choose the parametric model that fits it best (Cox-Snell(graphically check), Likelihood Ratio Test, AIC)
 - Compare variables to each other (Log Rank Test and Hazard Ratio )
-
-
-

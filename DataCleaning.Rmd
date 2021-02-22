@@ -1,6 +1,6 @@
 ---
 title: "Aging Dependence Data Cleaning"
-author: "Analeidi Barrera"
+author: "Analeidi Barrera and Colleen Minnihan"
 date: "2/16/2021"
 output: html_document
 ---

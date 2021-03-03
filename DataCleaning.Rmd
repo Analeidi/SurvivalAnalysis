@@ -78,6 +78,16 @@ Bathing or showering dependence = 5207 participants
 count(bath)
 ```
 
+Using or getting to the toilet dependence = 5619 participants
+
+```{r}
+count(toilet)
+```
+
+
+Eating dependence = 5904 participants
+```{r}
+count(eat)
 
 #==================================
 

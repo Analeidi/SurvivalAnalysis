@@ -24,11 +24,49 @@ data <- read_por(path_data)
 aging <- data %>% select(TLKCHL2, TLKCHL3, TLKCHL4, SEECHL2, SEECHL3, SEECHL4, MLCHL2R, MLCHL3R, MLCHL4R, CHLTME2R, CHLTME3R, CHLTME4R, WKSWORK2, WKSWORK3, WKSWORK4, MARSTAT2, MARSTAT3, MARSTAT4, DIFDRES2,DIFDRES3, DIFDRES4, BATH2R, BATH3R, BATH4R, TOILET2R, TOILET3R, TOILET4R, EAT2R, EAT3R, EAT4R, DIFPREP2, DIFPREP3, DIFPREP4, GET2R, GET3R, GET4R, DIFLTHW2, DIFLTHW3,  DIFLTHW4, DIFHSWK2, DIFHSWK3 , DIFHSWK4 , DIFTEL2 , DIFTEL3 , DIFTEL4,DIFMNY2, DIFMNY3, DIFMNY4, DIFSHOP2, DIFSHOP3, DIFSHOP4, DIFOUT2, DIFOUT3, DIFOUT4, DIFWALK2, DIFWALK3, DIFWALK4, BIRTHYR, RACER, SEX)
 
 
-#Choosing participants who were dependent from the start
+#Choosing participants who were dependent from the start 
+#OLD FILTERING
 
 bathData <- filter(bathData, bathData$BATH2R != "2" & (bathData$BATH2R != "" | bathData$BATH3R != "" | bathData$BATH4R != "") & (bathData$BATH2R != "3" & bathData$BATH3R != "3" & bathData$BATH4R != "3") & !(bathData$BATH3R == "2" & bathData$BATH4R == "1"))
 
 ```
+
+
+
+### Creating a KM curve for bathing (BATH2R), using the toilet(TOILET2R), and eating(EAT2R)
+
+In our data we have the following categories:
+
+1: Independent
+
+2: Dependent
+
+3: Don't know,... refused, does not do for other than health reasons
+
+
+We have to first filter out participants that were the following:
+ - Were dependent at 1986
+ - Went from dependent to independent (check if dependent-independent changes are due to other factors that are not temporary fractures); check how many cases there are
+ - Filter out all patients that answered (3) at any time period
+ - There is information at least in one of the years
+ 
+ 
+ 
+ 
+ Acceptable patients:
+ -Start off independent regardless of year (so 3->1, 1, ""->1, 3->3->1, )
+
+ 
+
+```{r}
+#Choosing participants who were dependent from the start
+#New Filtering
+
+bathData <- aging %>% filter(BATH2R != "2" & (BATH2R != "" | BATH3R != "" | BATH4R != "") & (BATH2R != "3" & BATH3R != "3" & BATH4R != "3") & !(BATH3R == "2" & BATH4R == "1"))
+```
+
+
+
 
 Looking into the age distribution of bathroom dependence
 
@@ -129,3 +167,7 @@ Some project analysis ideas are:
 -create survival curves for specific covariates (get the CI, mean, and median) using KM curves
 - From the KM curves that look the most interesting, choose the parametric model that fits it best (Cox-Snell(graphically check), Likelihood Ratio Test, AIC)
 - Compare variables to each other (Log Rank Test and Hazard Ratio )
+
+
+Some covariate could potentilly be time-varying
+-Recurrent Events (look into this)

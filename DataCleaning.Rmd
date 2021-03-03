@@ -18,16 +18,19 @@ data <- read_por(path_data)
 ```
 
 
+#==================================
+
+```{r}
+library(haven)
+library(dplyr)
+data <- read_por('/Users/analeidibarrera/Desktop/ProjectInformation/ICPSR_08719/DS0001/08719-0001-Data.por')
+```
+
+
 ```{r}
 #selecting covariates
 
 aging <- data %>% select(TLKCHL2, TLKCHL3, TLKCHL4, SEECHL2, SEECHL3, SEECHL4, MLCHL2R, MLCHL3R, MLCHL4R, CHLTME2R, CHLTME3R, CHLTME4R, WKSWORK2, WKSWORK3, WKSWORK4, MARSTAT2, MARSTAT3, MARSTAT4, DIFDRES2,DIFDRES3, DIFDRES4, BATH2R, BATH3R, BATH4R, TOILET2R, TOILET3R, TOILET4R, EAT2R, EAT3R, EAT4R, DIFPREP2, DIFPREP3, DIFPREP4, GET2R, GET3R, GET4R, DIFLTHW2, DIFLTHW3,  DIFLTHW4, DIFHSWK2, DIFHSWK3 , DIFHSWK4 , DIFTEL2 , DIFTEL3 , DIFTEL4,DIFMNY2, DIFMNY3, DIFMNY4, DIFSHOP2, DIFSHOP3, DIFSHOP4, DIFOUT2, DIFOUT3, DIFOUT4, DIFWALK2, DIFWALK3, DIFWALK4, BIRTHYR, RACER, SEX)
-
-
-#Choosing participants who were dependent from the start 
-#OLD FILTERING
-
-bathData <- filter(bathData, bathData$BATH2R != "2" & (bathData$BATH2R != "" | bathData$BATH3R != "" | bathData$BATH4R != "") & (bathData$BATH2R != "3" & bathData$BATH3R != "3" & bathData$BATH4R != "3") & !(bathData$BATH3R == "2" & bathData$BATH4R == "1"))
 
 ```
 
@@ -44,38 +47,39 @@ In our data we have the following categories:
 3: Don't know,... refused, does not do for other than health reasons
 
 
-We have to first filter out participants that were the following:
- - Were dependent at 1986
- - Went from dependent to independent (check if dependent-independent changes are due to other factors that are not temporary fractures); check how many cases there are
- - Filter out all patients that answered (3) at any time period
- - There is information at least in one of the years
- 
- 
- 
- 
- Acceptable patients:
- -Start off independent regardless of year (so 3->1, 1, ""->1, 3->3->1, 3->""->1,""->3->1)
-```{r}
-#acceptable scenarios
-data.frame("1986" = c(1,1,1,3,3,3,"",3,"","",""), "1988" = c(1,1,2,3,1,1,1,"",3,1,""), "1990" = c(1,2,2,1,1,2,2,1,1,1,1))
-```
+*For the purpose of this analysis, we are assuming that a (3) or no data means that nothing has changed from the previous information obtained. If no previous information was recorded, we assume the person is independent. 
+
+**The edge case of (1, _, 2) is a left censoring scenario since we only have an upper bound. We are assuming the above assumption is true
+
+The participants that we are considering are the following:
+- They must have started as independent at whatever year we had concrete information (2 or 1) on them
  
 
- 
+#### Creating a subset data with the targeted dependence/response variables
 
 ```{r}
-#Choosing participants who were dependent from the start
-#New Filtering
+#BATH
+bath <- aging %>% filter(BATH2R != "2" & (BATH2R == "1" |BATH3R == "1" | BATH4R == "1") & !(BATH3R == "2" & BATH4R == "1"))
 
-bathData <- aging %>% filter(BATH2R != "2" & (BATH2R != "" | BATH3R != "" | BATH4R != "") & (BATH2R != "3" & BATH3R != "3" & BATH4R != "3") & !(BATH3R == "2" & BATH4R == "1"))
+#TOILET
+toilet <- aging %>% filter(TOILET2R != "2" & (TOILET2R == "1" |TOILET3R == "1" | TOILET4R == "1") & !(TOILET3R == "2" & TOILET4R == "1"))
 
+#EAT 
+eat <- aging %>% filter(EAT2R != "2" & (EAT2R == "1" |EAT3R == "1" | EAT4R == "1") & !(EAT3R == "2" & EAT4R == "1"))
 
-#Colleen's attempt at new filtering based on my table
-bathDataC <- aging %>% filter(BATH2R != "2" & (BATH4R != "") & (BATH4R != "3") & !(BATH3R == "2" & BATH4R == "1"))
 ```
 
 
+The following are the data sizes that we are working with:
 
+Bathing or showering dependence = 5207 participants
+
+```{r}
+count(bath)
+```
+
+
+#==================================
 
 Looking into the age distribution of bathroom dependence
 

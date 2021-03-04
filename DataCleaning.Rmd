@@ -116,7 +116,59 @@ bath$age <- ifelse(bath$BATH4R== "1", 1990-as.integer(as.character(bath$BIRTHYR)
 bath$age <- ifelse(bath$BATH3R== "2", 1988- as.integer(as.character(bath$BIRTHYR)), ifelse(bath$BATH4R== "2", 1990-as.integer(as.character(bath$BIRTHYR)), bath$age))
 ```
 
+```{r}
+#Filtering out the participants that did not give their birth year
+bath <- bath %>% filter(age > 0)
+```
 
+
+Toilet:
+
+
+
+Eat:
+
+
+
+#### Generating the Kaplan-Meier Curve
+
+```{r}
+KMbath = survfit(Surv(age, Status)~1, data = bath)
+KMbath
+plot(KMbath, conf.int=FALSE, ylab="Survival" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1))
+```
+
+
+####Parametric
+
+Defining our parametric models to see which one fits best
+```{r}
+weibullBath = survreg(Surv(age, Status)~1, dist = "weibull", data = bath)
+expBath = survreg(Surv(age, Status)~1, dist = "exponential", data = bath)
+logNormalBath = survreg(Surv(age, Status)~1, dist = "lognormal", data = bath)
+normalBath = survreg(Surv(age, Status)~1, dist = "gaussian", data = bath)
+```
+
+
+Creating a plot for the following models
+
+Weibull:
+
+```{r}
+curve(1-pweibull(x, shape = 1/0.0499, scale = exp(4.55815)), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "purple")
+```
+
+
+
+Exponential ?????:
+```{r}
+expBath
+```
+
+
+```{r}
+curve(1-pexp(x, 1/exp(6.742626)),ylim = c(0,1), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "orange")
+```
 #==================================
 
 Looking into the age distribution of bathroom dependence

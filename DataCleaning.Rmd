@@ -20,6 +20,13 @@ data <- read_por(path_data)
 
 #==================================
 
+
+```{r}
+library(survminer)
+library(survival)
+```
+
+
 ```{r}
 library(haven)
 library(dplyr)
@@ -205,13 +212,13 @@ Now compare all of the parametric models to the KM curve to see which is visuall
 ```{r}
 plot(KMbath, conf.int=FALSE, ylab="Survival" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1))
 
-curve(1-pweibull(x, shape = 1/0.0499, scale = exp(4.55815)), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "purple", add = TRUE)
+curve(1-pweibull(x, shape = 1/0.0499, scale = exp(4.55815)), col = "purple", add = TRUE)
 
-curve(1-pexp(x, rate = 1/exp(6.7426)), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "orange", add = TRUE)
+curve(1-pexp(x, rate = 1/exp(6.7426)), col = "orange", add = TRUE)
 
-curve(1-pnorm(x, mean = 93.7955, sd = 7.07), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "red", add = TRUE)
+curve(1-pnorm(x, mean = 93.7955, sd = 7.07), col = "red", add = TRUE)
 
-curve(1-plnorm(x, meanlog = 4.5439, sdlog = 0.083), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "blue", add = TRUE)
+curve(1-plnorm(x, meanlog = 4.5439, sdlog = 0.083), col = "blue", add = TRUE)
 ```
 
 From the looks of the plot, it appears that the normal and log-normal curves provide the best estimate of the KM curve.  Choosing between normal and log-normal is too close to tell, so we may need to use AIC.
@@ -290,13 +297,13 @@ Now compare all of the parametric models to the KM curve to see which is visuall
 ```{r}
 plot(KMtoilet, conf.int=FALSE, ylab="Survival" , xlab="Age", xlim = c(min(toilet$age), max(toilet$age)), ylim = c(0,1))
 
-curve(1-pweibull(x, shape = 1/0.0518, scale = exp(4.59661)), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "purple", add = TRUE)
+curve(1-pweibull(x, shape = 1/0.0518, scale = exp(4.59661)), col = "purple", add = TRUE)
 
-curve(1-pexp(x, rate = 1/exp(7.2927)), xlim= c(min(toilet$age), max(toilet$age)), ylab="Survival", xlab = "Age", col = "orange", add = TRUE)
+curve(1-pexp(x, rate = 1/exp(7.2927)),  col = "orange", add = TRUE)
 
-curve(1-pnorm(x, mean = 97.8159, sd = 8), xlim= c(min(toilet$age), max(toilet$age)), ylab="Survival", xlab = "Age", col = "red", add = TRUE)
+curve(1-pnorm(x, mean = 97.8159, sd = 8),  col = "red", add = TRUE)
 
-curve(1-plnorm(x, meanlog = 4.58936, sdlog = 0.0927), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "blue", add = TRUE)
+curve(1-plnorm(x, meanlog = 4.58936, sdlog = 0.0927),col = "blue", add = TRUE)
 ```
 
 Comparing AICs of parametric toileting models to see which parametric model fits the data best:
@@ -323,11 +330,58 @@ Comparing AICs of parametric toileting models to see which parametric model fits
 AIC is lowest for the log-normal model, meaning that the log-normal model is the best fit for the toileting data.
 
 
+#### Looking at the distribution for bathing and toileting
+```{r}
+#bathing
+curve(1-plnorm(x, meanlog = 4.5439, sdlog = 0.083), col = "pink", ylab = "Survival", ylim= c(0, 1), xlim = c(min(bath$age, toilet$age, eat$age),max(bath$age, toilet$age, eat$age)))
+
+#Toileting
+curve(1-plnorm(x, meanlog = 4.58936, sdlog = 0.0927),col = "turquoise", add = TRUE)
+```
+
+
+
+#### Choosing a covariate
 
 
 ```{r}
-curve(1-pexp(x, 1/exp(6.742626)),ylim = c(0,1), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "orange")
+bath$SEX
 ```
+
+```{r}
+KMbathSex = survfit(Surv(age, Status)~SEX, data = bath)
+KMbathSex
+plot(KMbathSex, conf.int=FALSE, ylab="Survival" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1), col = c("blue", "red"))
+```
+
+
+```{r}
+KMtoiletSex = survfit(Surv(age, Status)~SEX, data = toilet)
+KMtoiletSex
+plot(KMtoiletSex, conf.int=FALSE, ylab="Survival" , xlab="Age", xlim = c(min(toilet$age), max(toilet$age)), ylim = c(0,1), col = c("blue", "red"))
+```
+
+
+
+Race:
+
+```{r}
+bath$RACER
+```
+
+```{r}
+KMbathRace = survfit(Surv(age, Status)~RACER, data = bath)
+KMbathRace
+plot(KMbathRace, conf.int= TRUE, ylab="Survival" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1), col = c("blue", "red", "green"))
+```
+
+
+Questions:
+1. Is the exponential model correct?
+2. Ask about marriage and child distance as covariates if there is changing info for year to year
+
+
+
 #==================================
 
 Looking into the age distribution of bathroom dependence

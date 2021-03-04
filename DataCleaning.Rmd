@@ -173,7 +173,7 @@ normalBath = survreg(Surv(age, Status)~1, dist = "gaussian", data = bath)
 
 Creating a plot for the following models
 
-Weibull:
+Bathing Weibull:
 
 ```{r}
 curve(1-pweibull(x, shape = 1/0.0499, scale = exp(4.55815)), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "purple")
@@ -181,20 +181,20 @@ curve(1-pweibull(x, shape = 1/0.0499, scale = exp(4.55815)), xlim= c(min(bath$ag
 
 
 
-Exponential ?????:
+Bathing Exponential ?????:
 ```{r}
 summary(expBath)
 
 curve(1-pexp(x, rate = 1/exp(6.7426)), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "orange")
 ```
 
-Normal:
+Bathing Normal:
 ```{r}
 summary(normalBath)
 curve(1-pnorm(x, mean = 93.7955, sd = 7.07), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "red")
 ```
 
-Log-Normal:
+Bathing Log-Normal:
 ```{r}
 summary(logNormalBath)
 
@@ -216,9 +216,17 @@ curve(1-plnorm(x, meanlog = 4.5439, sdlog = 0.083), xlim= c(min(bath$age), max(b
 
 From the looks of the plot, it appears that the normal and log-normal curves provide the best estimate of the KM curve.  Choosing between normal and log-normal is too close to tell, so we may need to use AIC.
 
-AIC to test normal vs. log-normal model (which is a better fit to our data):
+AIC to test which parametric model fits our bath data best:
 ```{r}
 #AIC = 2(P-L)
+
+#AIC for Weibull
+#summary(weibullBath)
+2*(2+2445.5)
+
+#AIC for Exponential
+#summary(expBath)
+2*(1+3879.1)
 
 #AIC for Normal
 #summary(normalBath)
@@ -229,7 +237,90 @@ AIC to test normal vs. log-normal model (which is a better fit to our data):
 2*(2+2414.1)
 ```
 
-The AICs are quite similar for both models, meaning they provide a similar fit, but the log-normal model has a slightly smaller AIC, so we would go with that model for our data.
+The AICs are quite similar for both normal and log-normal models, meaning they provide a similar fit, but the log-normal model has a slightly smaller AIC, so we would go with that model for our data.
+
+#### Generating the Kaplan-Meier Curve for toileting dependence
+
+```{r}
+KMtoilet = survfit(Surv(age, Status)~1, data = toilet)
+KMtoilet
+plot(KMtoilet, conf.int=FALSE, ylab="Survival" , xlab="Age", xlim = c(min(toilet$age), max(toilet$age)), ylim = c(0,1))
+```
+
+####Parametric models for toileting dependence
+
+Defining our parametric models to see which one fits best
+```{r}
+weibullToilet = survreg(Surv(age, Status)~1, dist = "weibull", data = toilet)
+expToilet = survreg(Surv(age, Status)~1, dist = "exponential", data = toilet)
+logNormalToilet = survreg(Surv(age, Status)~1, dist = "lognormal", data = toilet)
+normalToilet = survreg(Surv(age, Status)~1, dist = "gaussian", data = toilet)
+```
+
+Toileting Weibull:
+
+```{r}
+curve(1-pweibull(x, shape = 1/0.0518, scale = exp(4.59661)), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "purple")
+```
+
+
+Toileting Exponential ?????:
+```{r}
+summary(expToilet)
+
+curve(1-pexp(x, rate = 1/exp(7.2927)), xlim= c(min(toilet$age), max(toilet$age)), ylab="Survival", xlab = "Age", col = "orange")
+```
+
+
+Toileting Normal:
+```{r}
+curve(1-pnorm(x, mean = 97.8159, sd = 8), xlim= c(min(toilet$age), max(toilet$age)), ylab="Survival", xlab = "Age", col = "red")
+```
+
+
+Toileting Log-Normal:
+```{r}
+summary(logNormalToilet)
+
+curve(1-plnorm(x, meanlog = 4.58936, sdlog = 0.0927), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "blue")
+```
+
+
+Now compare all of the parametric models to the KM curve to see which is visually the best fit:
+```{r}
+plot(KMtoilet, conf.int=FALSE, ylab="Survival" , xlab="Age", xlim = c(min(toilet$age), max(toilet$age)), ylim = c(0,1))
+
+curve(1-pweibull(x, shape = 1/0.0518, scale = exp(4.59661)), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "purple", add = TRUE)
+
+curve(1-pexp(x, rate = 1/exp(7.2927)), xlim= c(min(toilet$age), max(toilet$age)), ylab="Survival", xlab = "Age", col = "orange", add = TRUE)
+
+curve(1-pnorm(x, mean = 97.8159, sd = 8), xlim= c(min(toilet$age), max(toilet$age)), ylab="Survival", xlab = "Age", col = "red", add = TRUE)
+
+curve(1-plnorm(x, meanlog = 4.58936, sdlog = 0.0927), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "blue", add = TRUE)
+```
+
+Comparing AICs of parametric toileting models to see which parametric model fits the data best:
+```{r}
+#AIC = 2(P-L)
+
+#AIC for Weibull
+#summary(weibullToilet)
+2*(2+1692.5)
+
+#AIC for Exponential
+#summary(expToilet)
+2*(1+2595.6)
+
+#AIC for Normal
+#summary(normalToilet)
+2*(2+1672.4)
+
+#AIC for log-normal
+#summary(logNormalToilet)
+2*(2+1669.7)
+```
+
+AIC is lowest for the log-normal model, meaning that the log-normal model is the best fit for the toileting data.
 
 
 

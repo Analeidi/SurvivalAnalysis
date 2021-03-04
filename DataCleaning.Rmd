@@ -89,6 +89,34 @@ Eating dependence = 5904 participants
 ```{r}
 count(eat)
 
+####Creating the Status variable
+
+1: Exact data 
+0: Censored data
+
+```{r}
+#Bath
+bath$Status <- ifelse(bath$BATH3R=="2" |bath$BATH4R=="2", 1, 0)
+
+#Toilet
+toilet$Status <- ifelse(toilet$TOILET3R=="2" |toilet$TOILET4R=="2", 1, 0)
+
+#Eat
+eat$Status <- ifelse(eat$EAT3R=="2" |eat$EAT4R=="2", 1, 0)
+```
+
+
+
+#### Creating an age variable depicting the age of dependence or censoring
+
+
+```{r}
+bath$age <- ifelse(bath$BATH4R== "1", 1990-as.integer(as.character(bath$BIRTHYR)), ifelse(bath$BATH3R== "1", 1988 - as.integer(as.character(bath$BIRTHYR)), 1986 -as.integer(as.character(bath$BIRTHYR))))
+
+bath$age <- ifelse(bath$BATH3R== "2", 1988- as.integer(as.character(bath$BIRTHYR)), ifelse(bath$BATH4R== "2", 1990-as.integer(as.character(bath$BIRTHYR)), bath$age))
+```
+
+
 #==================================
 
 Looking into the age distribution of bathroom dependence

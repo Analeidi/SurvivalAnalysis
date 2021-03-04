@@ -88,13 +88,17 @@ count(toilet)
 Eating dependence = 5904 participants
 ```{r}
 count(eat)
+```
 
 ####Creating the Status variable
 
 1: Exact data 
 0: Censored data
 
+
+
 ```{r}
+
 #Bath
 bath$Status <- ifelse(bath$BATH3R=="2" |bath$BATH4R=="2", 1, 0)
 
@@ -111,26 +115,43 @@ eat$Status <- ifelse(eat$EAT3R=="2" |eat$EAT4R=="2", 1, 0)
 
 
 ```{r}
+#bath data
 bath$age <- ifelse(bath$BATH4R== "1", 1990-as.integer(as.character(bath$BIRTHYR)), ifelse(bath$BATH3R== "1", 1988 - as.integer(as.character(bath$BIRTHYR)), 1986 -as.integer(as.character(bath$BIRTHYR))))
 
 bath$age <- ifelse(bath$BATH3R== "2", 1988- as.integer(as.character(bath$BIRTHYR)), ifelse(bath$BATH4R== "2", 1990-as.integer(as.character(bath$BIRTHYR)), bath$age))
+
+#toilet data
+toilet$age <- ifelse(toilet$TOILET4R== "1", 1990-as.integer(as.character(toilet$BIRTHYR)), ifelse(toilet$TOILET3R== "1", 1988 - as.integer(as.character(toilet$BIRTHYR)), 1986 -as.integer(as.character(toilet$BIRTHYR))))
+
+toilet$age <- ifelse(toilet$TOILET3R== "2", 1988- as.integer(as.character(toilet$BIRTHYR)), ifelse(toilet$TOILET4R== "2", 1990-as.integer(as.character(toilet$BIRTHYR)), toilet$age))
+
+#eating data
+eat$age <- ifelse(eat$EAT4R== "1", 1990-as.integer(as.character(eat$BIRTHYR)), ifelse(eat$EAT3R== "1", 1988 - as.integer(as.character(eat$BIRTHYR)), 1986 -as.integer(as.character(eat$BIRTHYR))))
+
+eat$age <- ifelse(eat$EAT3R== "2", 1988- as.integer(as.character(eat$BIRTHYR)), ifelse(eat$EAT4R== "2", 1990-as.integer(as.character(eat$BIRTHYR)), eat$age))
 ```
 
+Bath:
 ```{r}
 #Filtering out the participants that did not give their birth year
 bath <- bath %>% filter(age > 0)
 ```
 
-
 Toilet:
-
-
+```{r}
+#Filtering out the participants that did not give their birth year
+toilet <- toilet %>% filter(age > 0)
+```
 
 Eat:
+```{r}
+#Filtering out the participants that did not give their birth year
+eat <- eat %>% filter(age > 0)
+```
 
 
 
-#### Generating the Kaplan-Meier Curve
+#### Generating the Kaplan-Meier Curve for bathing dependence
 
 ```{r}
 KMbath = survfit(Surv(age, Status)~1, data = bath)
@@ -139,7 +160,7 @@ plot(KMbath, conf.int=FALSE, ylab="Survival" , xlab="Age", xlim = c(min(bath$age
 ```
 
 
-####Parametric
+####Parametric models for bathing dependence
 
 Defining our parametric models to see which one fits best
 ```{r}
@@ -162,8 +183,55 @@ curve(1-pweibull(x, shape = 1/0.0499, scale = exp(4.55815)), xlim= c(min(bath$ag
 
 Exponential ?????:
 ```{r}
-expBath
+summary(expBath)
+
+curve(1-pexp(x, rate = 1/exp(6.7426)), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "orange")
 ```
+
+Normal:
+```{r}
+summary(normalBath)
+curve(1-pnorm(x, mean = 93.7955, sd = 7.07), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "red")
+```
+
+Log-Normal:
+```{r}
+summary(logNormalBath)
+
+curve(1-plnorm(x, meanlog = 4.5439, sdlog = 0.083), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "blue")
+```
+
+Now compare all of the parametric models to the KM curve to see which is visually the best fit:
+```{r}
+plot(KMbath, conf.int=FALSE, ylab="Survival" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1))
+
+curve(1-pweibull(x, shape = 1/0.0499, scale = exp(4.55815)), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "purple", add = TRUE)
+
+curve(1-pexp(x, rate = 1/exp(6.7426)), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "orange", add = TRUE)
+
+curve(1-pnorm(x, mean = 93.7955, sd = 7.07), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "red", add = TRUE)
+
+curve(1-plnorm(x, meanlog = 4.5439, sdlog = 0.083), xlim= c(min(bath$age), max(bath$age)), ylab="Survival", xlab = "Age", col = "blue", add = TRUE)
+```
+
+From the looks of the plot, it appears that the normal and log-normal curves provide the best estimate of the KM curve.  Choosing between normal and log-normal is too close to tell, so we may need to use AIC.
+
+AIC to test normal vs. log-normal model (which is a better fit to our data):
+```{r}
+#AIC = 2(P-L)
+
+#AIC for Normal
+#summary(normalBath)
+2*(2+2417.5)
+
+#AIC for log-normal
+#summary(logNormalBath)
+2*(2+2414.1)
+```
+
+The AICs are quite similar for both models, meaning they provide a similar fit, but the log-normal model has a slightly smaller AIC, so we would go with that model for our data.
+
+
 
 
 ```{r}

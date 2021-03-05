@@ -39,6 +39,12 @@ data <- read_por('/Users/analeidibarrera/Desktop/ProjectInformation/ICPSR_08719/
 
 aging <- data %>% select(TLKCHL2, TLKCHL3, TLKCHL4, SEECHL2, SEECHL3, SEECHL4, MLCHL2R, MLCHL3R, MLCHL4R, CHLTME2R, CHLTME3R, CHLTME4R, WKSWORK2, WKSWORK3, WKSWORK4, MARSTAT2, MARSTAT3, MARSTAT4, DIFDRES2,DIFDRES3, DIFDRES4, BATH2R, BATH3R, BATH4R, TOILET2R, TOILET3R, TOILET4R, EAT2R, EAT3R, EAT4R, DIFPREP2, DIFPREP3, DIFPREP4, GET2R, GET3R, GET4R, DIFLTHW2, DIFLTHW3,  DIFLTHW4, DIFHSWK2, DIFHSWK3 , DIFHSWK4 , DIFTEL2 , DIFTEL3 , DIFTEL4,DIFMNY2, DIFMNY3, DIFMNY4, DIFSHOP2, DIFSHOP3, DIFSHOP4, DIFOUT2, DIFOUT3, DIFOUT4, DIFWALK2, DIFWALK3, DIFWALK4, BIRTHYR, RACER, SEX)
 
+#creating a "how quickly can children get there" variable with 4 levels: < 1 hr, >= 1 hr, no children, children in household
+aging1 <- aging %>%
+  select(CHLTME2R) %>%
+  mutate(children_dist = ifelse(CHLTME2R == '1' | CHLTME2R == '2' | CHLTME2R == '3', 'less than 1 hr', ifelse(CHLTME2R == '4' | CHLTME2R == '5' | CHLTME2R == '6', 'at least 1 hr',ifelse(CHLTME2R == '7','no children',ifelse(CHLTME2R == '8', 'children in house', NA)))))
+
+aging1
 ```
 
 

@@ -40,12 +40,34 @@ data <- read_por('/Users/analeidibarrera/Desktop/ProjectInformation/ICPSR_08719/
 aging <- data %>% select(TLKCHL2, TLKCHL3, TLKCHL4, SEECHL2, SEECHL3, SEECHL4, MLCHL2R, MLCHL3R, MLCHL4R, CHLTME2R, CHLTME3R, CHLTME4R, WKSWORK2, WKSWORK3, WKSWORK4, MARSTAT2, MARSTAT3, MARSTAT4, DIFDRES2,DIFDRES3, DIFDRES4, BATH2R, BATH3R, BATH4R, TOILET2R, TOILET3R, TOILET4R, EAT2R, EAT3R, EAT4R, DIFPREP2, DIFPREP3, DIFPREP4, GET2R, GET3R, GET4R, DIFLTHW2, DIFLTHW3,  DIFLTHW4, DIFHSWK2, DIFHSWK3 , DIFHSWK4 , DIFTEL2 , DIFTEL3 , DIFTEL4,DIFMNY2, DIFMNY3, DIFMNY4, DIFSHOP2, DIFSHOP3, DIFSHOP4, DIFOUT2, DIFOUT3, DIFOUT4, DIFWALK2, DIFWALK3, DIFWALK4, BIRTHYR, RACER, SEX)
 
 #creating a "how quickly can children get there" variable with 4 levels: < 1 hr, >= 1 hr, no children, children in household
-aging1 <- aging %>%
-  select(CHLTME2R) %>%
-  mutate(children_dist = ifelse(CHLTME2R == '1' | CHLTME2R == '2' | CHLTME2R == '3', 'less than 1 hr', ifelse(CHLTME2R == '4' | CHLTME2R == '5' | CHLTME2R == '6', 'at least 1 hr',ifelse(CHLTME2R == '7','no children',ifelse(CHLTME2R == '8', 'children in house', NA)))))
+aging <- aging %>%
+  mutate(children_dist = ifelse(CHLTME2R == '1' | CHLTME2R == '2' | CHLTME2R == '3', 'less than 1 hr', ifelse(CHLTME2R == '4' | CHLTME2R == '5' | CHLTME2R == '6', 'at least 1 hr',ifelse(CHLTME2R == '7','no children',ifelse(CHLTME2R == '8', 'children in house', NA))))) %>%
+  # mutate(see_children = ifelse(SEECHL2 == c(000,011,012,013,021,022,031,032,041,042,051,061,071,081,091,101,111,121,131),"1 month or less",ifelse(SEECHL2 == c(014,)))
+  mutate(temp_SEECHL2 = as.numeric(strsplit(as.character(SEECHL2), "")[[1]]))
+ # mutate(see_children = ifelse([3] == 1 &)
+         
 
-aging1
+#less than 1 month
+#1 month to a year
+#greater than a year
+
+as.numeric(strsplit(as.character(aging$SEECHL2), "")[1])
+
+aging$SEECHL2[1]
 ```
+
+```{r}
+n=c(3,2,1)
+
+n[1]
+
+
+a <- 6547
+a <- as.numeric(strsplit(as.character(a), "")[[1]])
+
+a[2]
+```
+
 
 
 
@@ -335,16 +357,28 @@ Comparing AICs of parametric toileting models to see which parametric model fits
 
 AIC is lowest for the log-normal model, meaning that the log-normal model is the best fit for the toileting data.
 
+Log-normal model for eat variable
+```{r}
+logNormalEat = survreg(Surv(age, Status)~1, dist = "lognormal", data = eat)
+
+logNormalEat
+```
+
+
 
 #### Looking at the distribution for bathing and toileting
 ```{r}
 #bathing
-curve(1-plnorm(x, meanlog = 4.5439, sdlog = 0.083), col = "pink", ylab = "Survival", ylim= c(0, 1), xlim = c(min(bath$age, toilet$age, eat$age),max(bath$age, toilet$age, eat$age)))
+curve(1-plnorm(x, meanlog = 4.5439, sdlog = 0.083), col = "pink", ylab = "Survival", xlab = "Age", ylim= c(0, 1), xlim = c(min(bath$age, toilet$age, eat$age),max(bath$age, toilet$age, eat$age)))
 
 #Toileting
 curve(1-plnorm(x, meanlog = 4.58936, sdlog = 0.0927),col = "turquoise", add = TRUE)
-```
 
+#Eating
+curve(1-plnorm(x, meanlog = 4.662521, sdlog = 0.1111955),col = "brown", add = TRUE)
+```
+TO DO
+-do a KM curve with all of the data in one (AML) : to get a p-value for if the curves are significantly different
 
 
 #### Choosing a covariate
@@ -381,10 +415,35 @@ KMbathRace
 plot(KMbathRace, conf.int= TRUE, ylab="Survival" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1), col = c("blue", "red", "green"))
 ```
 
+Distance away from Children (for bath dependence)
+```{r}
+KMbathdistance = survfit(Surv(age, Status)~children_dist, data = bath)
+KMbathdistance
+
+plot(KMbathdistance, conf.int= FALSE, ylab="Survival" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1), col = c("blue", "red", "green","orange"))
+```
+
+Distance away from Children (for toilet dependence)
+```{r}
+KMtoiletdistance = survfit(Surv(age, Status)~children_dist, data = toilet)
+KMtoiletdistance
+
+plot(KMtoiletdistance, conf.int= FALSE, ylab="Survival" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1), col = c("blue", "red", "green","orange"))
+```
+
+Distance away from Children (for eat dependence)
+```{r}
+KMeatdistance = survfit(Surv(age, Status)~children_dist, data = eat)
+KMeatdistance
+
+plot(KMeatdistance, conf.int= FALSE, ylab="Survival" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1), col = c("blue", "red", "green","orange"))
+```
+
+
 
 Questions:
-1. Is the exponential model correct?
-2. Ask about marriage and child distance as covariates if there is changing info for year to year
+1. Why are the medians NA on the distance away from children KM curves?
+
 
 
 

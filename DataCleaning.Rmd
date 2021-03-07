@@ -37,13 +37,19 @@ data <- read_por('/Users/analeidibarrera/Desktop/ProjectInformation/ICPSR_08719/
 ```{r}
 #selecting covariates
 
-aging <- data %>% select(TLKCHL2, TLKCHL3, TLKCHL4, SEECHL2, SEECHL3, SEECHL4, MLCHL2R, MLCHL3R, MLCHL4R, CHLTME2R, CHLTME3R, CHLTME4R, WKSWORK2, WKSWORK3, WKSWORK4, MARSTAT2, MARSTAT3, MARSTAT4, DIFDRES2,DIFDRES3, DIFDRES4, BATH2R, BATH3R, BATH4R, TOILET2R, TOILET3R, TOILET4R, EAT2R, EAT3R, EAT4R, DIFPREP2, DIFPREP3, DIFPREP4, GET2R, GET3R, GET4R, DIFLTHW2, DIFLTHW3,  DIFLTHW4, DIFHSWK2, DIFHSWK3 , DIFHSWK4 , DIFTEL2 , DIFTEL3 , DIFTEL4,DIFMNY2, DIFMNY3, DIFMNY4, DIFSHOP2, DIFSHOP3, DIFSHOP4, DIFOUT2, DIFOUT3, DIFOUT4, DIFWALK2, DIFWALK3, DIFWALK4, BIRTHYR, RACER, SEX)
+aging <- data %>% select(TLKCHL2, TLKCHL3, TLKCHL4, SEECHL2, SEECHL3, SEECHL4, MLCHL2R, MLCHL3R, MLCHL4R, CHLTME2R, CHLTME3R, CHLTME4R, WKSWORK2, WKSWORK3, WKSWORK4, MARSTAT2, MARSTAT3, MARSTAT4, DIFDRES2,DIFDRES3, DIFDRES4, BATH2R, BATH3R, BATH4R, TOILET2R, TOILET3R, TOILET4R, EAT2R, EAT3R, EAT4R, DIFPREP2, DIFPREP3, DIFPREP4, GET2R, GET3R, GET4R, DIFLTHW2, DIFLTHW3,  DIFLTHW4, DIFHSWK2, DIFHSWK3 , DIFHSWK4 , DIFTEL2 , DIFTEL3 , DIFTEL4,DIFMNY2, DIFMNY3, DIFMNY4, DIFSHOP2, DIFSHOP3, DIFSHOP4, DIFOUT2, DIFOUT3, DIFOUT4, DIFWALK2, DIFWALK3, DIFWALK4, BIRTHYR, RACER, SEX,INCFAMR)
 
 #creating a "how quickly can children get there" variable with 4 levels: < 1 hr, >= 1 hr, no children, children in household
 aging <- aging %>%
   mutate(children_dist = ifelse(CHLTME2R == '1' | CHLTME2R == '2' | CHLTME2R == '3', 'less than 1 hr', ifelse(CHLTME2R == '4' | CHLTME2R == '5' | CHLTME2R == '6', 'at least 1 hr',ifelse(CHLTME2R == '7','no children',ifelse(CHLTME2R == '8', 'children in house', NA))))) %>%
-  # mutate(see_children = ifelse(SEECHL2 == c(000,011,012,013,021,022,031,032,041,042,051,061,071,081,091,101,111,121,131),"1 month or less",ifelse(SEECHL2 == c(014,)))
-  mutate(temp_SEECHL2 = as.numeric(strsplit(as.character(SEECHL2), "")[[1]]))
+  mutate(see_children = ifelse(SEECHL2 == '000'|SEECHL2 == '011'|SEECHL2 == '012'|SEECHL2 == '021'|SEECHL2 == '022'|SEECHL2 == '031'|SEECHL2 == '032'|SEECHL2 == '041'|SEECHL2 == '051'|SEECHL2 == '061'|SEECHL2 == '071'|SEECHL2 == '081'|SEECHL2 == '091'|SEECHL2 == '101'|SEECHL2 == '111'|SEECHL2 == '121'|SEECHL2 == '131',"less than 1 month",ifelse(SEECHL2 == '013'|SEECHL2 == '014' |SEECHL2 == '023' |SEECHL2 == '033'|SEECHL2 == '042'|SEECHL2 == '043'|SEECHL2 == '052'|SEECHL2 == '053'|SEECHL2 == '062'|SEECHL2 == '063'|SEECHL2 == '072'|SEECHL2 == '073'|SEECHL2 == '082'|SEECHL2 == '083'|SEECHL2 == '092'|SEECHL2 == '093'|SEECHL2 == '102'|SEECHL2 == '103'|SEECHL2 == '112'|SEECHL2 == '113'|SEECHL2 == '122'|SEECHL2 =='123',"1 month to 1 year", ifelse(SEECHL2 == '024'|SEECHL2 == '034'|SEECHL2 == '044'|SEECHL2 == '054'|SEECHL2 == '064'|SEECHL2 == '074'|SEECHL2 == '084'|SEECHL2 == '094'|SEECHL2 == '104'|SEECHL2 == '114'|SEECHL2 == '124',"greater than 1 year",NA)))) %>%
+  mutate(fam_income84 = ifelse(INCFAMR=='0'|INCFAMR=='1'|INCFAMR=='2','less than 10k',ifelse(INCFAMR=='3'|INCFAMR=='4','10k to 19k',ifelse(INCFAMR=='5'|INCFAMR=='6'|INCFAMR=='7'| INCFAMR=='8','20k+',NA))))
+
+  
+  
+   # mutate(see_children = ifelse(SEECHL2 == c('000','011','012','021','022','031','032','041','051','061','071','081','091','101','111','121','131'),"less than 1 month",ifelse(SEECHL2 == c('013','014','023','033','042','043','052','053','062','063','072','073','082','083','092','093','102','103','112','113','122','123'),"1 month to 1 year", ifelse(SEECHL2 == c('024','034','044','054','064','074','084','094','104','114','124'),"greater than 1 year",NA))))
+
+  #mutate(temp_SEECHL2 = as.numeric(strsplit(as.character(SEECHL2), "")[[1]]))
  # mutate(see_children = ifelse([3] == 1 &)
          
 
@@ -436,10 +442,26 @@ Distance away from Children (for eat dependence)
 KMeatdistance = survfit(Surv(age, Status)~children_dist, data = eat)
 KMeatdistance
 
-plot(KMeatdistance, conf.int= FALSE, ylab="Survival" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1), col = c("blue", "red", "green","orange"))
+plot(KMeatdistance, conf.int= FALSE, ylab="Survival" , xlab="Age", xlim = c(min(eat$age), max(eat$age)), ylim = c(0,1), col = c("blue", "red", "green","orange"))
 ```
 
+How often see children (for bath dependence)
+```{r}
+KMbathseeChildren = survfit(Surv(age, Status)~see_children, data = bath)
+KMbathseeChildren
 
+plot(KMbathseeChildren, conf.int= FALSE, ylab="Survival" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1), col = c("blue", "red", "green"))
+```
+
+How often see children (for bath dependence)
+```{r}
+KMbathbed = survfit(Surv(age, Status)~fam_income84, data = bath)
+KMbathbed
+
+plot(KMbathbed, conf.int= FALSE, ylab="Survival" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1), col= c("blue","red","green"))
+
+aging$BED2
+```
 
 Questions:
 1. Why are the medians NA on the distance away from children KM curves?

@@ -37,7 +37,7 @@ data <- read_por('/Users/analeidibarrera/Desktop/ProjectInformation/ICPSR_08719/
 ```{r}
 #selecting covariates
 
-aging <- data %>% select(TLKCHL2, TLKCHL3, TLKCHL4, SEECHL2, SEECHL3, SEECHL4, MLCHL2R, MLCHL3R, MLCHL4R, CHLTME2R, CHLTME3R, CHLTME4R, WKSWORK2, WKSWORK3, WKSWORK4, MARSTAT2, MARSTAT3, MARSTAT4, DIFDRES2,DIFDRES3, DIFDRES4, BATH2R, BATH3R, BATH4R, TOILET2R, TOILET3R, TOILET4R, EAT2R, EAT3R, EAT4R, DIFPREP2, DIFPREP3, DIFPREP4, GET2R, GET3R, GET4R, DIFLTHW2, DIFLTHW3,  DIFLTHW4, DIFHSWK2, DIFHSWK3 , DIFHSWK4 , DIFTEL2 , DIFTEL3 , DIFTEL4,DIFMNY2, DIFMNY3, DIFMNY4, DIFSHOP2, DIFSHOP3, DIFSHOP4, DIFOUT2, DIFOUT3, DIFOUT4, DIFWALK2, DIFWALK3, DIFWALK4, BIRTHYR, RACER, SEX,INCFAMR)
+aging <- data %>% select(TLKCHL2, TLKCHL3, TLKCHL4, SEECHL2, SEECHL3, SEECHL4, MLCHL2R, MLCHL3R, MLCHL4R, CHLTME2R, CHLTME3R, CHLTME4R, WKSWORK2, WKSWORK3, WKSWORK4, MARSTAT2, MARSTAT3, MARSTAT4, DIFDRES2,DIFDRES3, DIFDRES4, BATH2R, BATH3R, BATH4R, TOILET2R, TOILET3R, TOILET4R, EAT2R, EAT3R, EAT4R, DIFPREP2, DIFPREP3, DIFPREP4, GET2R, GET3R, GET4R, DIFLTHW2, DIFLTHW3,  DIFLTHW4, DIFHSWK2, DIFHSWK3 , DIFHSWK4 , DIFTEL2 , DIFTEL3 , DIFTEL4,DIFMNY2, DIFMNY3, DIFMNY4, DIFSHOP2, DIFSHOP3, DIFSHOP4, DIFOUT2, DIFOUT3, DIFOUT4, DIFWALK2, DIFWALK3, DIFWALK4, BIRTHYR, RACER, SEX,INCFAMR,EDUC)
 
 #creating a "how quickly can children get there" variable with 4 levels: < 1 hr, >= 1 hr, no children, children in household
 aging <- aging %>%
@@ -466,6 +466,121 @@ aging$BED2
 Questions:
 1. Why are the medians NA on the distance away from children KM curves?
 
+
+Regular exercise routine? (for bath dependence)
+```{r}
+KMbathexercise = survfit(Surv(age, Status)~REGEXE1, data = bath)
+KMbathexercise
+
+plot(KMbathexercise, conf.int= FALSE, ylab="Survival" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1), col= c("blue","red","green","orange"))
+
+#red=YES
+#blue=NO
+```
+
+
+Overall Health Status in 1984 for bath data
+(I lumped "excellent","very good", and "good" into a GOOD category, and "fair" and "poor" into a BAD category- so I binarized it)
+```{r}
+KMbathhealth = survfit(Surv(age, Status)~health1984, data = bath)
+KMbathhealth
+
+plot(KMbathhealth, conf.int= FALSE, ylab="Survival" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1), col= c("blue","red"))
+
+#red=good
+#blue=bad
+
+summary(survreg( Surv(age,Status) ~ health1984 , dist='lognormal', data=bath ))
+
+survdiff( Surv(age,Status) ~ health1984 , data=bath )
+
+test_stat <- 42.4+13.2
+
+pval <- 1 - pchisq(test_stat , df=1 )
+
+pval
+
+(190/119)/(310/381)
+```
+
+Overall health status in 1984 for toilet data
+```{r}
+KMtoilethealth = survfit(Surv(age, Status)~health1984, data = toilet)
+KMtoilethealth
+
+plot(KMtoilethealth, conf.int= FALSE, ylab="Survival" , xlab="Age", xlim = c(min(toilet$age), max(toilet$age)), ylim = c(0,1), col= c("blue","red"))
+
+#red=bad
+#blue=good
+
+
+```
+**P-value for a Kaplan-Meier curve?? Comparing if adding a covariate matters or not**
+
+Overall health status in 1984 for eat data
+```{r}
+KMeathealth = survfit(Surv(age, Status)~health1984, data = eat)
+KMeathealth
+
+plot(KMeathealth, conf.int= FALSE, ylab="Survival" , xlab="Age", xlim = c(min(eat$age), max(eat$age)), ylim = c(0,1), col= c("blue","red"))
+
+#red=bad
+#blue=good
+
+survdiff( Surv(age,Status) ~ health1984 , data=eat )
+
+1-pchisq(4.70+1.91,df = 1)
+
+(56/42)/(89/103)
+```
+
+
+
+Ever had a stroke for the toilet variable (b/c the bath and eat variables had super overlapping CIs)
+```{r}
+KMtoiletStroke = survfit(Surv(age, Status)~stroke, data = toilet)
+KMtoiletStroke
+
+plot(KMtoiletStroke, conf.int= FALSE, ylab="Survival" , xlab="Age", xlim = c(min(toilet$age), max(toilet$age)), ylim = c(0,1), col= c("blue","red"))
+
+#blue=no stroke
+#red=yes stroke
+```
+
+
+```{r}
+bdata = bath %>% select(Time = age, Status)
+tdata = toilet %>% select(Time = age, Status)
+edata = eat %>% select(Time = age, Status)
+```
+```{r}
+BTE = rbind(bdata, tdata, edata)
+BTE = BTE %>% mutate(Group = c(rep("bath", 5204), rep("toilet", 5616), rep("eat", 5901)))
+```
+
+```{r}
+survreg( Surv(Time,Status) ~ Group , dist='lognormal', data=BTE )
+```
+
+EDUCATION 
+*remember to select
+```{r}
+bath$EDUCAT= ifelse(bath$EDUC %in% c("09", "10", "11", "12"), 2, ifelse(bath$EDUC %in% c("13", "14", "15", "16", "17", "18"), 3, ifelse(bath$EDUC == "19", NA, 1)))
+```
+
+
+```{r}
+newBath = bath %>% filter(EDUCAT %in% c(1, 2, 3))
+```
+
+
+```{r}
+km = survfit(Surv(age, Status)~EDUCAT, data = newBath)
+km
+
+plot(km, conf.int= FALSE, ylab="Survival" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1), col= c("blue","red","green"))
+
+```
 
 
 

@@ -312,9 +312,9 @@ BTE = BTE %>% mutate(Group = c(rep("bath", 5204), rep("toilet", 5616), rep("eat"
 #Not the mantel-cox p-value... (it gives the mantel-haensel)
 km = survfit( Surv(Time,Status) ~ Group, data=BTE )
 plot(km, col=c("red", "blue", "purple"), xlim= c(70, 110), xlab = "Age", ylab = "Probability of Independence")
-text(75, 0.4, "log-rank < .01")
-title("KM Curves for Bathing, Eating, and Toileting Dependence")
-legend(70, 0.8, legend=c("Bathing", "Eating", "Toileting"),
+text(77, 0.2, "log-rank p-value < .01")
+title("Kaplan-Meier Curves for Dependence")
+legend(70, 0.7, legend=c("Bathing", "Eating", "Toileting"),
        col=c("red", "blue", "purple"), lty = 1, cex = 0.8)
 
 survdiff( Surv(Time,Status) ~ Group, data=BTE )
@@ -375,15 +375,27 @@ plot(KMbathRace, conf.int= FALSE, ylab="Survival" , xlab="Age", xlim = c(min(bat
 
 #remove RACER=3 (race=other)
 plot(KMbathRace[1:2], conf.int= FALSE, ylab="Probability of Independence" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1), col = c("blue", "red"))
-text(75, 0.4, "log-rank < .001")
+text(77, 0.2, "log-rank p-value < .001")
 title("KM Curves for Bathing Dependence by Race")
-legend(72, 0.8, legend=c("White", "Black"),
+legend(74, 0.5, legend=c("White", "Black"),
+       col=c("red", "blue", "purple"), lty = 1, cex = 0.8)
+
+KMtoiletRace = survfit(Surv(age, Status)~RACER, data = toilet)
+KMtoiletRace
+
+#remove RACER=3 (race=other)
+plot(KMtoiletRace[1:2], conf.int= FALSE, ylab="Probability of Independence" , xlab="Age", xlim = c(min(bath$age), max(bath$age)), ylim = c(0,1), col = c("blue", "red"))
+text(75, 0.4, "log-rank < ??")
+title("KM Curves for Toileting Dependence by Race")
+legend(70, 0.7, legend=c("White", "Black"),
        col=c("red", "blue", "purple"), lty = 1, cex = 0.8)
 ```
 
 
 ```{r}
 survdiff( Surv(age, Status) ~ RACER , data=bath )
+
+survdiff( Surv(age, Status) ~ RACER , data=toilet )
 ```
 
 
@@ -436,7 +448,7 @@ KMbathinc = survfit(Surv(age, Status)~fam_income84, data = bath)
 KMbathinc
 
 plot(KMbathinc, conf.int= FALSE, ylab="Probability of Independence" , xlab="Age", xlim = c(75, max(bath$age)), ylim = c(0,1), col= c("blue","red","green"))
-text(79, 0.4, "log-rank = 0.2")
+text(79, 0.4, "log-rank p-value > 0.05")
 title("KM Curves for Bathing Dependence by Income (1984)")
 legend(76, 0.8, legend=c("< 10k","10k-19k", "20k+"),
        col=c("green","blue", "red"), lty = 1, cex = 0.8)
